@@ -1,3 +1,5 @@
+drop view if exists vw_events;
+drop view if exists vw_games;
 drop table if exists events;
 drop table if exists games;
 drop table if exists rosters;
@@ -19,6 +21,10 @@ drop table if exists lkup_cd_recorder_pitches;
 drop table if exists lkup_id_base;
 drop table if exists lkup_id_home;
 drop table if exists lkup_id_last;
+drop table if exists PeopleIDs;
+drop table if exists PlayerIDs;
+drop table if exists hist_playerids;
+drop table if exists teamids;
 
 CREATE TABLE games (
 	game_id text primary key
@@ -300,6 +306,130 @@ CREATE TABLE parkcodes (
 	"end" text,
 	league text,
 	notes text
+);
+
+CREATE TABLE peopleids (
+        key_person text not null,
+        key_uuid text not null primary key,
+        key_mlbam text UNIQUE,
+        key_retro text UNIQUE,
+        key_bbref text,
+        key_bbref_minors text,
+        key_fangraphs text,
+        key_npb text,
+        key_sr_nfl text,
+        key_sr_nba text,
+        key_sr_nhl text,
+        key_findagrave text,
+        name_last text,
+        name_first text,
+        name_given text,
+        name_suffix text,
+        name_matrilineal text,
+        name_nick text,
+        birth_year text,
+        birth_month text,
+        birth_day text,
+        death_year text,
+        death_month text,
+        death_day text,
+        pro_played_first text,
+        pro_played_last text,
+        mlb_played_first text,
+        mlb_played_last text,
+        col_played_first text,
+        col_played_last text,
+        pro_managed_first text,
+        pro_managed_last text,
+        mlb_managed_first text,
+        mlb_managed_last text,
+        col_managed_first text,
+        col_managed_last text,
+        pro_umpired_first text,
+        pro_umpired_last text,
+        mlb_umpired_first text,
+        mlb_umpired_last text
+);
+
+CREATE TABLE playerids (
+        mlb_id text not null primary key,
+        mlb_name text,
+        mlb_pos text,
+        mlb_team text,
+        mlb_team_long text,
+        bats text,
+        throws text,
+        birth_year text,
+        bp_id text,
+        bref_id text,
+        bref_name text,
+        cbs_id text,
+        cbs_name text,
+        cbs_pos text,
+        espn_id text,
+        espn_name text,
+        espn_pos text,
+        fg_id text,
+        fg_name text,
+        fg_pos text,
+        lahman_id text,
+        nfbc_id text,
+        nfbc_name text,
+        nfbc_pos text,
+        retro_id text UNIQUE,
+        retro_name text,
+        debut text,
+        yahoo_id text,
+        yahoo_name text,
+        yahoo_pos text,
+        mlb_depth text,
+        ottoneu_id text,
+        ottoneu_name text,
+        ottoneu_pos text,
+        rotowire_id text,
+        rotowire_name text,
+        rotowire_pos text
+);
+
+CREATE TABLE hist_playerids (
+        playerID text not null primary key,
+        birthYear text,
+        birthMonth text,
+        birthDay text,
+        birthCountry text,
+        birthState text,
+        birthCity text,
+        deathYear text,
+        deathMonth text,
+        deathDay text,
+        deathCountry text,
+        deathState text,
+        deathCity text,
+        nameFirst text,
+        nameLast text,
+        nameGiven text,
+        weight text,
+        height text,
+        bats text,
+        throws text,
+        debut text,
+        finalGame text,
+        retroID text UNIQUE,
+        bbrefID text UNIQUE
+);
+
+CREATE TABLE teamids (
+    ID_current TEXT,
+    ID_past TEXT,
+    League TEXT,
+    Division TEXT,
+    Location TEXT,
+    Nickname1 TEXT,
+    Nickname2 TEXT,
+    FirstGameDate DATE,
+    LastGameDate DATE,
+    City TEXT,
+    State TEXT
 );
 
 create table lkup_cd_bases		(value_cd integer,	shortname_tx text, longname_tx text, description_tx text );

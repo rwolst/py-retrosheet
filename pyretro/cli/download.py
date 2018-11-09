@@ -10,18 +10,21 @@ import re
 import click
 import wget
 
-from classes.fetcher import Fetcher
+from ..classes.fetcher import Fetcher
+from ..utils import (load_installed_config)
 
-# load configs
-CONFIG = ConfigParser.ConfigParser()
-CONFIG.readfp(open('config.ini'))
+# Load CONFIG.
+CONFIG = load_installed_config()
 
-# load and evaluate download directory
+# Load and evaluate download directory
 PATH = CONFIG.get('download', 'directory')
-ABSOLUTE_PATH = os.path.abspath(PATH)
+if CONFIG.get('download', 'use_tmp') == 'True':
+    ABSOLUTE_PATH = '/tmp/' + PATH
+else:
+    ABSOLUTE_PATH = os.path.abspath(PATH)
 
-# test for existence of download directory
-# create if does not exist
+# Test for existence of download directory
+# Create if does not exist
 try:
     os.chdir(ABSOLUTE_PATH)
 except OSError:
@@ -50,7 +53,7 @@ def cli():
 
 
 @click.command(help="Download Retrosheet years.")
-@click.option('--years', '-y', multiple=True, default=['2012'], type=str, help="The years we want to download.")
+@click.argument('years', nargs=-1, type=str)
 def retro(years):
     """Download Retrosheet files for the given years."""
     # initialize variables / set defaults
@@ -114,6 +117,7 @@ def retro(years):
     # wait for all threads to finish
     for thread in threads:
         thread.join()
+    print("\nSaved file to %s" % ABSOLUTE_PATH)
 
 
 @click.command(help="Download PeopleIDs.")
@@ -123,21 +127,27 @@ def people():
 
     wget.download('https://raw.githubusercontent.com/chadwickbureau/register/master/data/people.csv',
                   out=ABSOLUTE_PATH + '/people.csv')
-    print()
+    print("\nSaved file to %s" % ABSOLUTE_PATH)
 
 
 @click.command(help="Download PlayerIDs.")
 def players():
     # Remove file if already exists.
     remove_file('players.csv')
-    remove_file('hist_players.csv')
 
     wget.download('http://crunchtimebaseball.com/master.csv',
                   out=ABSOLUTE_PATH + '/players.csv')
-    print()
+    print("\nSaved file to %s" % ABSOLUTE_PATH)
+
+
+@click.command(help="Download PlayerIDs.")
+def hist_players():
+    # Remove file if already exists.
+    remove_file('hist_players.csv')
+
     wget.download('https://raw.githubusercontent.com/chadwickbureau/baseballdatabank/master/core/People.csv',
                   out=ABSOLUTE_PATH + '/hist_players.csv')
-    print()
+    print("\nSaved file to %s" % ABSOLUTE_PATH)
 
 
 @click.command(help="Download TeamIDs.")
@@ -146,14 +156,11 @@ def teams():
 
     wget.download('http://www.retrosheet.org/CurrentNames.csv',
                   out=ABSOLUTE_PATH + '/teams.csv')
-    print()
+    print("\nSaved file to %s" % ABSOLUTE_PATH)
 
 
 cli.add_command(retro)
 cli.add_command(people)
 cli.add_command(players)
+cli.add_command(hist_players)
 cli.add_command(teams)
-
-
-if __name__ == "__main__":
-    cli()

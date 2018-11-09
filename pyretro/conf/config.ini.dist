@@ -8,6 +8,7 @@ password = password
 
 [download]
 directory = files
+use_tmp = True
 
 # This seems like a safe value for retrosheet.org
 num_threads = 10
@@ -17,7 +18,7 @@ dl_eventfiles = True
 dl_gamelogs = False
 
 [chadwick]
-directory = /usr/local/bin/
+directory = chadwick-0.7.1/src/cwtools
 
 # Don't change this unless you know what you're doing
 [retrosheet]
