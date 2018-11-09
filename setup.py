@@ -5,6 +5,8 @@ import codecs
 import sys
 import os
 import os.path as path
+import shutil
+
 
 # where this file is located
 cwd = path.dirname(__file__)
@@ -38,11 +40,14 @@ setup(
         'MLB GameDay',
     ],
     platforms='ANY',
-    packages=['pyretro', 'pyretro/classes'],
+    install_requires=['sqlalchemy', 'psycopg2', 'click', 'wget', 'pandas'],
+    packages=['pyretro', 'pyretro/classes', 'pyretro/cli'],
+    data_files=[('./conf', ['pyretro/conf/pyretro_config.ini.dist'])],
     entry_points="""
         [console_scripts]
         pyretro_download=pyretro.cli.download:cli
         pyretro_ensure=pyretro.cli.ensure:cli
         pyretro_parse=pyretro.cli.parse:cli
+        pyretro_config=pyretro.cli.config:cli
       """,
 )

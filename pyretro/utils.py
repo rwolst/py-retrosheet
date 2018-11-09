@@ -3,13 +3,33 @@ import configparser
 import sqlalchemy
 
 
-def load_installed_config():
-    """Loads the CONFIG file for the installed package."""
+def load_raw_config():
+    """Loads the raw config file without any modifications."""
+    # The CONFIG is either installed in the installation path (if editable
+    # install) or in env/config. We check them both.
     install_path = os.path.dirname(os.path.abspath(__file__))
+    virtual_path = os.environ['VIRTUAL_ENV']
 
     # Load CONFIG.
+    install_config_path = install_path + '/conf/pyretro_config.ini'
+    virtual_config_path = virtual_path + '/conf/pyretro_config.ini.dist'
     config = configparser.ConfigParser()
-    config.readfp(open(install_path + '/conf/config.ini'))
+    if os.path.exists(install_config_path):
+        config.readfp(open(install_config_path))
+        config_path = install_config_path
+    elif os.path.exists(virtual_config_path):
+        config.readfp(open(virtual_config_path))
+        config_path = virtual_config_path
+    else:
+        raise Exception("No CONFIG file found.")
+
+    return config, install_path, config_path
+
+
+def load_installed_config():
+    """Loads the CONFIG file for the installed package and adds extra
+    sections."""
+    config, install_path, config_path = load_raw_config()
 
     # Add install path to the config.
     config.add_section('path')
