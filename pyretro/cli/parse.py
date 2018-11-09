@@ -11,10 +11,10 @@ import csv
 import click
 import pandas as pd
 
-from ..utils import (connect, load_installed_config)
+from ..utils import (connect, load_modified_config)
 
 # Load CONFIG.
-CONFIG = load_installed_config()
+CONFIG = load_modified_config()
 
 
 def parse_rosters(fname, conn, bound_param):

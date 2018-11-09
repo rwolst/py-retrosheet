@@ -42,7 +42,12 @@ setup(
     platforms='ANY',
     install_requires=['sqlalchemy', 'psycopg2', 'click', 'wget', 'pandas'],
     packages=['pyretro', 'pyretro/classes', 'pyretro/cli'],
-    data_files=[('./conf', ['pyretro/conf/pyretro_config.ini.dist'])],
+    data_files=[('./pyretro_conf', ['pyretro/conf/config.ini.dist']),
+                ('./pyretro_sql', ['pyretro/sql/postgres/hist_playerids_schema.sql',
+                                   'pyretro/sql/postgres/peopleids_schema.sql',
+                                   'pyretro/sql/postgres/playerids_schema.sql',
+                                   'pyretro/sql/postgres/retro_schema.sql',
+                                   'pyretro/sql/postgres/teamids_schema.sql'])],
     entry_points="""
         [console_scripts]
         pyretro_download=pyretro.cli.download:cli

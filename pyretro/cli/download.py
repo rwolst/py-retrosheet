@@ -11,10 +11,10 @@ import click
 import wget
 
 from ..classes.fetcher import Fetcher
-from ..utils import (load_installed_config)
+from ..utils import (load_modified_config)
 
 # Load CONFIG.
-CONFIG = load_installed_config()
+CONFIG = load_modified_config()
 
 # Load and evaluate download directory
 PATH = CONFIG.get('download', 'directory')

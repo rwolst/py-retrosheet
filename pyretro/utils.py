@@ -3,37 +3,69 @@ import configparser
 import sqlalchemy
 
 
-def load_raw_config():
-    """Loads the raw config file without any modifications."""
-    # The CONFIG is either installed in the installation path (if editable
-    # install) or in env/config. We check them both.
+def get_paths():
+    """Gets the following paths:
+        install_path: Where the package is installed.
+        virtual_path: The path for the current virtual environment we are in.
+        config_path: The path to the CONFIG file.
+        sql_path: The path to the SQL scripts directory.
+    """
+    # Install and virtual are easy.
     install_path = os.path.dirname(os.path.abspath(__file__))
     virtual_path = os.environ['VIRTUAL_ENV']
 
-    # Load CONFIG.
-    install_config_path = install_path + '/conf/pyretro_config.ini'
-    virtual_config_path = virtual_path + '/conf/pyretro_config.ini.dist'
-    config = configparser.ConfigParser()
+    # The CONFIG is either installed in the installation path (if editable
+    # install) or in env/conf. We check them both.
+    install_config_path = install_path + '/conf/config.ini'
+    virtual_config_path = virtual_path + '/pyretro_conf/config.ini.dist'
     if os.path.exists(install_config_path):
-        config.readfp(open(install_config_path))
         config_path = install_config_path
     elif os.path.exists(virtual_config_path):
-        config.readfp(open(virtual_config_path))
         config_path = virtual_config_path
     else:
         raise Exception("No CONFIG file found.")
 
-    return config, install_path, config_path
+    # Similarly for the SQL scripts.
+    install_sql_path = install_path + '/sql/postgres'
+    virtual_sql_path = virtual_path + '/pyretro_sql'
+    if os.path.exists(install_sql_path):
+        sql_path = install_sql_path
+    elif os.path.exists(virtual_sql_path):
+        sql_path = virtual_sql_path
+    else:
+        raise Exception("No SQL path found.")
+
+    return {'install': install_path,
+            'virtual': virtual_path,
+            'config': config_path,
+            'sql': sql_path}
 
 
 def load_installed_config():
+    """Loads the CONFIG file for the installed package."""
+    paths = get_paths()
+
+    # Load CONFIG.
+    config = configparser.ConfigParser()
+    config.readfp(open(paths['config']))
+
+    return config, paths
+
+
+def load_modified_config():
     """Loads the CONFIG file for the installed package and adds extra
     sections."""
-    config, install_path, config_path = load_raw_config()
+    config, paths = load_installed_config()
 
     # Add install path to the config.
     config.add_section('path')
-    config.set('path', 'install_path', install_path)
+    config.set('path', 'install_path', paths['install'])
+
+    # Add config path to the config.
+    config.set('path', 'config_path', paths['config'])
+
+    # Add sql path to the config.
+    config.set('path', 'sql_path', paths['sql'])
 
     # Make and add download path to the config.
     download_path = config.get('download', 'directory')

@@ -4,7 +4,7 @@ import os
 import configparser as ConfigParser
 import click
 
-from ..utils import load_raw_config
+from ..utils import load_installed_config
 
 @click.group(help="CLI for setting configuration values.")
 def cli():
@@ -18,13 +18,13 @@ def cli():
 def modify(section, key, value):
     """Modify config file and overwrite the old one."""
     # First get handle to CONFIG file.
-    config, _, config_path = load_raw_config()
+    config, paths = load_installed_config()
 
     # Modify the value.
     config.set(section, key, value)
 
     # Overwrite the old CONFIG.
-    with open(config_path, 'w') as f:
+    with open(paths['config'], 'w') as f:
         config.write(f)
 
 

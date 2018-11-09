@@ -6,11 +6,11 @@ import configparser as ConfigParser
 import sqlalchemy
 import click
 
-from ..utils import (connect, load_installed_config)
+from ..utils import (connect, load_modified_config)
 
 
 # Load CONFIG.
-CONFIG = load_installed_config()
+CONFIG = load_modified_config()
 
 
 def execute_sql_file(fname, conn):
@@ -42,8 +42,8 @@ def ensure(name, table_names, conn, recreate):
     then we always drop any existing table. The name of the .sql to run
     when creating is in fname and the names of all tables that should exist
     are in table_names."""
-    path = CONFIG.get('path', 'install_path') + '/sql/postgres'
-    fname = path + '/%s_schema.postgres.sql' % name
+    path = CONFIG.get('path', 'sql_path')
+    fname = path + '/%s_schema.sql' % name
 
     if not recreate:
         # Find if table exists.
