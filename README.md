@@ -78,5 +78,109 @@ If you're using PostgreSQL (and you should be), you can get a dump of all data u
 After creating a PostgreSQL user named `wells`, you can create a database from the dump by running `pg_restore -U <USERNAME> -d <DATABASE> -1 retrosheet.2016.psql`.
 
 ### License
-
 I don't care. Have at it.
+
+### Parse Test
+To make sure the parsing updating is working correctly to the following:
+
+1. Parse all players and people into the database.
+
+2. Remove one player from peopleIDs, re-parse and make sure it has been re-added.
+
+    - DELETE FROM peopleids WHERE key_uuid = '663ecca1-6b4e-4a11-9494-1caa6d6b2d13';
+
+    - SELECT COUNT(*) FROM peopleids;
+
+    - pyretro_parse people
+
+    - SELECT COUNT(*) FROM peopleids;
+
+3. Remove one player from playerIDs, re-parse and make sure it has been re-added.
+
+    - DELETE FROM playerIDS WHERE mlb_id = '592091';
+
+    - SELECT COUNT(*) FROM playerids;
+
+    - pyretro_parse players
+
+    - SELECT COUNT(*) FROM playerids;
+
+4. Remove one player from hist_playerIDs, re-parse and make sure it has been re-added.
+
+    - DELETE FROM hist_playerIDS WHERE playerid = 'aardsda01';
+
+    - SELECT COUNT(*) FROM hist_playerIDs;
+
+    - pyretro_parse hist-players
+
+    - SELECT COUNT(*) FROM hist_playerIDs;
+
+5. Remove one player from teamIDs, re-parse and make sure it has been re-added.
+
+    - DELETE FROM teamIDs WHERE id_current = 'ANA';
+
+    - SELECT COUNT(*) FROM teamIDs;
+
+    - pyretro_parse teams
+
+    - SELECT COUNT(*) FROM teamIDs;
+
+6. Update a player to 'ravenholm-...' in playerIDs, who has a corresponding
+   entry in peopleIDs. Parse people again and make sure it has been updated
+   to the correct retroID in playerIDs, events and games.
+
+    - UPDATE playerIDs SET retro_id = 'ravenholm-112526' WHERE retro_id = 'colob001';
+
+    - UPDATE events SET pit_id = 'ravenholm-112526' WHERE pit_id = 'colob001';
+
+    - UPDATE games SET home_start_pit_id = 'ravenholm-112526' WHERE home_start_pit_id = 'colob001';
+
+    - UPDATE games SET away_start_pit_id = 'ravenholm-112526' WHERE away_start_pit_id = 'colob001';
+
+    - SELECT COUNT(*), retro_id FROM playerIDs WHERE retro_id in ('ravenholm-112526', 'colob001') GROUP BY retro_id;
+
+    - SELECT COUNT(*), pit_id FROM events WHERE pit_id in ('ravenholm-112526', 'colob001') GROUP BY pit_id;
+
+    - SELECT COUNT(*), home_start_pit_id FROM games WHERE home_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY home_start_pit_id;
+
+    - SELECT COUNT(*), away_start_pit_id FROM games WHERE away_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY away_start_pit_id;
+
+    - pyretro_parse people
+
+    - SELECT COUNT(*), retro_id FROM playerIDs WHERE retro_id in ('ravenholm-112526', 'colob001') GROUP BY retro_id;
+
+    - SELECT COUNT(*), pit_id FROM events WHERE pit_id in ('ravenholm-112526', 'colob001') GROUP BY pit_id;
+
+    - SELECT COUNT(*), home_start_pit_id FROM games WHERE home_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY home_start_pit_id;
+
+    - SELECT COUNT(*), away_start_pit_id FROM games WHERE away_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY away_start_pit_id;
+
+7. Update a player to 'ravenholm-...' in playerIDs. Parse players again and
+   make sure it has been updated to the correct retroID in playerIDs, events
+   and games.
+
+    - UPDATE playerIDs SET retro_id = 'ravenholm-112526' WHERE retro_id = 'colob001';
+
+    - UPDATE events SET pit_id = 'ravenholm-112526' WHERE pit_id = 'colob001';
+
+    - UPDATE games SET home_start_pit_id = 'ravenholm-112526' WHERE home_start_pit_id = 'colob001';
+
+    - UPDATE games SET away_start_pit_id = 'ravenholm-112526' WHERE away_start_pit_id = 'colob001';
+
+    - SELECT COUNT(*), retro_id FROM playerIDs WHERE retro_id in ('ravenholm-112526', 'colob001') GROUP BY retro_id;
+
+    - SELECT COUNT(*), pit_id FROM events WHERE pit_id in ('ravenholm-112526', 'colob001') GROUP BY pit_id;
+
+    - SELECT COUNT(*), home_start_pit_id FROM games WHERE home_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY home_start_pit_id;
+
+    - SELECT COUNT(*), away_start_pit_id FROM games WHERE away_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY away_start_pit_id;
+
+    - pyretro_parse players
+
+    - SELECT COUNT(*), retro_id FROM playerIDs WHERE retro_id in ('ravenholm-112526', 'colob001') GROUP BY retro_id;
+
+    - SELECT COUNT(*), pit_id FROM events WHERE pit_id in ('ravenholm-112526', 'colob001') GROUP BY pit_id;
+
+    - SELECT COUNT(*), home_start_pit_id FROM games WHERE home_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY home_start_pit_id;
+
+    - SELECT COUNT(*), away_start_pit_id FROM games WHERE away_start_pit_id in ('ravenholm-112526', 'colob001') GROUP BY away_start_pit_id;

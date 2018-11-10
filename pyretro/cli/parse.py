@@ -9,7 +9,6 @@ import glob
 import re
 import csv
 import click
-import pandas as pd
 
 from ..utils import (connect, load_modified_config)
 
@@ -189,7 +188,8 @@ def parse_people(fname, conn, bound_param):
         # able to update.
         sql = """SELECT derived.mlb_id, derived.retro_id, peopleids.key_mlbam, peopleids.key_retro FROM (SELECT mlb_id, retro_id FROM playerids WHERE retro_id LIKE 'ravenholm%%') as derived LEFT JOIN peopleids ON (derived.mlb_id = peopleids.key_mlbam) WHERE peopleids.key_retro is not null"""
         res = conn.execute(sql)
-        updates = pd.DataFrame(res.fetchall(), columns=res.keys())
+        updates = res.fetchall()
+        updates_keys = res.keys()
 
         ### Get the column names to update.
         ### Note this also gets team IDs, game IDs etc. but they should never be
@@ -203,7 +203,10 @@ def parse_people(fname, conn, bound_param):
         games_id_columns = [i[0] for i in res.fetchall()]
 
         ### Now loop.
-        for idx, row in updates.iterrows():
+        for row in updates:
+            ## Allow us to refer to columns by name.
+            row = dict(zip(updates_keys, row))
+
             ### Update all instances of retro_id to retro_id_temp
             for col in events_id_columns:
                 sql = """UPDATE events SET %s = '%s' WHERE %s = '%s'"""
@@ -258,7 +261,8 @@ def parse_players(fname, conn, bound_param):
         # Find conflicting players.
         sql = """SELECT * FROM (SELECT playerids.mlb_id as mlb_id, playerids.retro_id as retro_id, playerids_temp.retro_id as retro_id_temp FROM playerids INNER JOIN playerids_temp ON (playerids.mlb_id = playerids_temp.mlb_id)) as derived WHERE retro_id != retro_id_temp"""
         res = conn.execute(sql)
-        duplicates = pd.DataFrame(res.fetchall(), columns=res.keys())
+        duplicates = res.fetchall()
+        duplicates_keys = res.keys()
 
         conn.execute('DROP TABLE playerids_temp')
 
@@ -274,7 +278,10 @@ def parse_players(fname, conn, bound_param):
         games_id_columns = [i[0] for i in res.fetchall()]
 
         ### Now loop.
-        for idx, row in duplicates.iterrows():
+        for row in duplicates:
+            ### Allow us to refer to column entries by name.
+            row = dict(zip(duplicates_keys, row))
+
             ### Update all instances of retro_id to retro_id_temp
             for col in events_id_columns:
                 sql = """UPDATE events SET %s = '%s' WHERE %s = '%s'"""
