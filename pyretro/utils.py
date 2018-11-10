@@ -1,6 +1,7 @@
 import os
 import configparser
 import sqlalchemy
+import sys
 
 
 def get_paths():
@@ -13,30 +14,38 @@ def get_paths():
     # Install and virtual are easy.
     install_path = os.path.dirname(os.path.abspath(__file__))
     virtual_path = os.environ['VIRTUAL_ENV']
+    system_path = sys.prefix
 
     # The CONFIG is either installed in the installation path (if editable
     # install) or in env/conf. We check them both.
     install_config_path = install_path + '/conf/config.ini'
     virtual_config_path = virtual_path + '/pyretro_conf/config.ini.dist'
+    system_config_path = system_path + '/pyretro_conf/config.ini.dist'
     if os.path.exists(install_config_path):
         config_path = install_config_path
     elif os.path.exists(virtual_config_path):
         config_path = virtual_config_path
+    elif os.path.exists(system_config_path):
+        config_path = system_config_path
     else:
         raise Exception("No CONFIG file found.")
 
     # Similarly for the SQL scripts.
     install_sql_path = install_path + '/sql/postgres'
     virtual_sql_path = virtual_path + '/pyretro_sql'
+    system_sql_path = system_path + '/pyretro_sql'
     if os.path.exists(install_sql_path):
         sql_path = install_sql_path
     elif os.path.exists(virtual_sql_path):
         sql_path = virtual_sql_path
+    elif os.path.exists(system_sql_path):
+        sql_path = system_sql_path
     else:
         raise Exception("No SQL path found.")
 
     return {'install': install_path,
             'virtual': virtual_path,
+            'system': system_path,
             'config': config_path,
             'sql': sql_path}
 
