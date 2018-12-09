@@ -163,8 +163,26 @@ def teams(recreate):
     conn.close()
 
 
+@click.command(help="SQL to ensure the ParksIDs table.")
+@click.option('--recreate', is_flag=True, help="Force recreation of tables when ensuring i.e. delete all current data.")
+def parks(recreate):
+    try:
+        conn = connect(CONFIG)
+    except Exception as e:
+        print('Cannot connect to database: %s' % e)
+        raise SystemExit
+
+    verbose = CONFIG.getboolean('debug', 'verbose')
+    table_names = ['parkids']
+
+    ensure('parkids', table_names, conn, recreate)
+
+    conn.close()
+
+
 cli.add_command(retro)
 cli.add_command(people)
 cli.add_command(players)
 cli.add_command(hist_players)
 cli.add_command(teams)
+cli.add_command(parks)

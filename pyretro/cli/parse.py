@@ -375,6 +375,46 @@ def parse_teamids(fname, conn, bound_param):
             conn.execute(sql, row)
 
 
+def parse_parks(fname, conn, bound_param):
+    """Insert/Update parksIDs (in fname) into the database. The bound_param
+    argument represents the default variable argument in SQL that the engine
+    understands e.g. '?' for SQLite or '%s' for PostgreSQL."""
+    print("Processing %s" % fname)
+
+    if conn.engine.driver == 'psycopg2':
+        ## Always delete all data and re-add.
+        #print("""Warning: deleting all previous peopleids in update. This may
+        #      not be want we want especially if we have created ravenholm-...
+        #      players.""")
+
+        # Only do this if parkIDs has no ravenholm_park-... entries.
+        res = conn.execute("SELECT key FROM parkIDs WHERE key LIKE 'ravenholm_park-%%'")
+        temp = list(res.fetchall())
+        if len(temp) != 0:
+            raise Exception("""Cannot update parkIDs as we have ravenholm parks
+                               currently in the table. Deleting these leaves
+                               hanging references in games. Instead we must
+                               re-create the whole Ravenholm database i.e.
+                               at end of season when new Retrosheet is
+                               released (this is good practice anyway):\n%s.""" % temp)
+
+        conn.execute('TRUNCATE TABLE parkids')
+
+        ## In order to get access to the copy_expert methods, we have to create
+        ## a raw database connection.
+        fake_conn = conn.engine.raw_connection()
+        fake_cur = fake_conn.cursor()
+        f = open(fname, 'rb')
+        fake_cur.execute("SET CLIENT_ENCODING TO 'LATIN1';")
+        fake_cur.copy_expert('COPY parkids FROM STDOUT WITH CSV HEADER', f)
+        fake_conn.commit()
+        #fake_conn.close()
+        conn.execute('COMMIT')
+
+    else:
+        raise Exception("Only implemented for Postgres.")
+
+
 @click.group(help="CLI for parsing downloaded files into the database.")
 def cli():
     pass
@@ -552,8 +592,28 @@ def teams():
     conn.close()
 
 
+@click.command(help="Parse the ParkIDs download.")
+#@click.option('--recreate', is_flag=True, help="Recreates the tables from fresh, should only be used if also recreating retro tables to avoid hanging references to ravenholm-... players.")
+def parks():
+    try:
+        conn = connect(CONFIG)
+    except Exception as e:
+        print('Cannot connect to database: %s' % e)
+        raise SystemExit
+
+    path        = CONFIG.get('path', 'download_path')
+    bound_param = '?' if CONFIG.get('database', 'engine') == 'sqlite' else '%s'
+
+    os.chdir(path) # Chadwick seems to need to be in the directory
+
+    parse_parks('parks.csv', conn, bound_param)
+
+    conn.close()
+
+
 cli.add_command(retro)
 cli.add_command(people)
 cli.add_command(players)
 cli.add_command(hist_players)
 cli.add_command(teams)
+cli.add_command(parks)

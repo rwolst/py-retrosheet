@@ -159,8 +159,18 @@ def teams():
     print("\nSaved file to %s" % ABSOLUTE_PATH)
 
 
+@click.command(help="Download Parks.")
+def parks():
+    remove_file('parks.csv')
+
+    wget.download('https://raw.githubusercontent.com/chadwickbureau/baseballdatabank/master/core/Parks.csv',
+                  out=ABSOLUTE_PATH + '/parks.csv')
+    print("\nSaved file to %s" % ABSOLUTE_PATH)
+
+
 cli.add_command(retro)
 cli.add_command(people)
 cli.add_command(players)
 cli.add_command(hist_players)
 cli.add_command(teams)
+cli.add_command(parks)
