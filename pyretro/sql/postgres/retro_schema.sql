@@ -1,10 +1,10 @@
 drop view if exists vw_events;
 drop view if exists vw_games;
+drop view if exists vw_home_parks;
 drop table if exists events;
 drop table if exists games;
 drop table if exists rosters;
 drop table if exists teams;
-drop table if exists parkcodes;
 drop table if exists lkup_cd_bases;
 drop table if exists lkup_cd_battedball;
 drop table if exists lkup_cd_event;
@@ -290,18 +290,6 @@ CREATE TABLE rosters (
 	,team_tx text references teams(team_id)
 	,pos_tx text
 	,primary key (year, player_id, team_tx)
-);
-
-CREATE TABLE parkcodes (
-	park_id text not null primary key,
-	name text,
-	aka text,
-	city text,
-	state text,
-	start text,
-	"end" text,
-	league text,
-	notes text
 );
 
 create table lkup_cd_bases		(value_cd integer,	shortname_tx text, longname_tx text, description_tx text );

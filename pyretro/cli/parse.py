@@ -376,7 +376,7 @@ def parse_teamids(fname, conn, bound_param):
 
 
 def parse_parks(fname, conn, bound_param):
-    """Insert/Update parksIDs (in fname) into the database. The bound_param
+    """Insert/Update parkcodes (in fname) into the database. The bound_param
     argument represents the default variable argument in SQL that the engine
     understands e.g. '?' for SQLite or '%s' for PostgreSQL."""
     print("Processing %s" % fname)
@@ -388,17 +388,16 @@ def parse_parks(fname, conn, bound_param):
         #      players.""")
 
         # Only do this if parkIDs has no ravenholm_park-... entries.
-        res = conn.execute("SELECT key FROM parkIDs WHERE key LIKE 'ravenholm_park-%%'")
+        res = conn.execute("SELECT park_id FROM parkcodes WHERE park_id LIKE 'ravenholm_park-%%'")
         temp = list(res.fetchall())
         if len(temp) != 0:
-            raise Exception("""Cannot update parkIDs as we have ravenholm parks
-                               currently in the table. Deleting these leaves
-                               hanging references in games. Instead we must
-                               re-create the whole Ravenholm database i.e.
-                               at end of season when new Retrosheet is
-                               released (this is good practice anyway):\n%s.""" % temp)
+            raise Exception("""Cannot update parkcodes as we have ravenholm
+                parks currently in the table. Deleting these leaves hanging
+                references in games. Instead we must re-create the whole
+                Ravenholm database i.e.  at end of season when new Retrosheet
+                is released (this is good practice anyway):\n%s.""" % temp)
 
-        conn.execute('TRUNCATE TABLE parkids')
+        conn.execute('TRUNCATE TABLE parkcodes')
 
         ## In order to get access to the copy_expert methods, we have to create
         ## a raw database connection.
@@ -406,7 +405,7 @@ def parse_parks(fname, conn, bound_param):
         fake_cur = fake_conn.cursor()
         f = open(fname, 'rb')
         fake_cur.execute("SET CLIENT_ENCODING TO 'LATIN1';")
-        fake_cur.copy_expert('COPY parkids FROM STDOUT WITH CSV HEADER', f)
+        fake_cur.copy_expert("COPY parkcodes FROM STDOUT WITH CSV HEADER DELIMITER ',' QUOTE '\"'", f)
         fake_conn.commit()
         #fake_conn.close()
         conn.execute('COMMIT')

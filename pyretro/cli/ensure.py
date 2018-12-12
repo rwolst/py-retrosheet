@@ -173,9 +173,9 @@ def parks(recreate):
         raise SystemExit
 
     verbose = CONFIG.getboolean('debug', 'verbose')
-    table_names = ['parkids']
+    table_names = ['parkcodes']
 
-    ensure('parkids', table_names, conn, recreate)
+    ensure('parkcodes', table_names, conn, recreate)
 
     conn.close()
 

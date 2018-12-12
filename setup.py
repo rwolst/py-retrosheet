@@ -47,7 +47,7 @@ setup(
                                    'pyretro/sql/postgres/peopleids_schema.sql',
                                    'pyretro/sql/postgres/playerids_schema.sql',
                                    'pyretro/sql/postgres/retro_schema.sql',
-                                   'pyretro/sql/postgres/parkids_schema.sql',
+                                   'pyretro/sql/postgres/parkcodes_schema.sql',
                                    'pyretro/sql/postgres/teamids_schema.sql'])],
     entry_points="""
         [console_scripts]
