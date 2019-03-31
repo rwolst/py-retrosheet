@@ -144,7 +144,7 @@ CREATE TABLE events (
     ph_fl text,
     bat_fld_cd text,
     bat_lineup_id text,
-    event_cd text,
+    event_cd integer,
     bat_event_fl text,
     ab_fl text,
     h_cd text,
