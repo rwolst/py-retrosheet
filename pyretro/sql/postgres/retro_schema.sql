@@ -113,7 +113,7 @@ CREATE TABLE events (
     game_id text not null,
     away_team_id text,
     inn_ct integer,
-    bat_home_id text,
+    bat_home_id integer,
     outs_ct integer,
     balls_ct integer,
     strikes_ct integer,
