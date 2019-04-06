@@ -19,9 +19,9 @@ USAGE
 
 ### Setup
 
-    cp scripts/config.ini.dist scripts/config.ini
+    cp conf/config.ini.dist conf/config.ini
 
-Edit `scripts/config.ini` as needed.  See the steps below for what might need to be changed.
+Edit `conf/config.ini` as needed.  See the steps below for what might need to be changed.
 
 ### Download
 
