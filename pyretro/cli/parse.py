@@ -244,7 +244,10 @@ def parse_players(fname, conn, bound_param):
         fake_cur = fake_conn.cursor()
         f = open(fname, 'rb')
         fake_cur.execute("SET CLIENT_ENCODING TO 'LATIN1';")
-        fake_cur.copy_expert('COPY playerids_temp FROM STDOUT WITH CSV HEADER', f)
+        fake_cur.copy_expert(
+            "COPY playerids_temp FROM STDOUT WITH CSV HEADER DELIMITER ','",
+            f
+        )
         fake_conn.commit()
         #fake_conn.close()
         conn.execute('COMMIT')

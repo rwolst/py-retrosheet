@@ -30,8 +30,6 @@ CREATE TABLE playerids (
         debut text,
         yahoo_id text,
         yahoo_name text,
-        yahoo_pos text,
-        mlb_depth text,
         ottoneu_id text,
         ottoneu_name text,
         ottoneu_pos text,
