@@ -106,7 +106,10 @@ CREATE TABLE games (
         home_lineup9_bat_id text,
         home_lineup9_fld_cd integer,
         away_finish_pit_id text,
-        home_finish_pit_id text
+        home_finish_pit_id text,
+        inserted_time timestamp with time zone,
+        uncertainty float,
+        source text
 );
 
 CREATE TABLE events (
@@ -270,6 +273,10 @@ CREATE TABLE events (
     ass10_fld_cd text,
     unknown_out_exc_fl text,
     uncertain_play_exc_fl text,
+    true_time timestamp with time zone,
+    inserted_time timestamp with time zone,
+    uncertainty float,
+    source text,
     primary key (game_id, event_id)
 );
 

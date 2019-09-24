@@ -7,6 +7,8 @@ import subprocess
 import time
 import glob
 import re
+import datetime
+
 import csv
 import click
 
@@ -81,7 +83,7 @@ def parse_games(fname, conn, bound_param):
     except:
         print('Cannot get year from game file %s' % fname)
         return None
- 
+
     if conn.engine.driver == 'psycopg2':
         ## Avoid adding existing data.
         conn.execute('DELETE FROM games WHERE game_id LIKE \'%%' + year + '%%\'')
@@ -90,11 +92,23 @@ def parse_games(fname, conn, bound_param):
         ## a raw database connection.
         fake_conn = conn.engine.raw_connection()
         fake_cur = fake_conn.cursor()
-        f = open(fname, 'rb')
-        fake_cur.copy_expert('COPY games FROM STDOUT WITH CSV HEADER', f)
-        fake_conn.commit()
-        #fake_conn.close()
-        conn.execute('COMMIT')
+        with open(fname, 'r') as f_old, open(fname + '.new', 'w') as f_new:
+            reader = csv.reader(f_old)
+            writer = csv.writer(f_new)
+
+            headers = reader.__next__()
+            headers += ['inserted_time', 'uncertainty', 'source']
+            writer.writerow(headers)
+
+            for row in reader:
+                row += [datetime.datetime.utcnow(), 1, 'Retrosheet']
+                writer.writerow(row)
+
+        with open(fname + '.new', 'rb') as f:
+            fake_cur.copy_expert('COPY games FROM STDOUT WITH CSV HEADER', f)
+            fake_conn.commit()
+            #fake_conn.close()
+            conn.execute('COMMIT')
     else:
         reader = csv.reader(open(fname))
         headers = reader.next()
@@ -105,6 +119,9 @@ def parse_games(fname, conn, bound_param):
             ## Avoid adding existing data.
             if res.rowcount == 1:
                 continue
+
+            headers += ['inserted_time', 'uncertainty', 'source']
+            row += [datetime.datetime.utcnow(), 1, 'Retrosheet']
 
             sql = 'INSERT INTO games(%s) VALUES(%s)' % (','.join(headers), ','.join([bound_param] * len(headers)))
             conn.execute(sql, row)
@@ -131,11 +148,24 @@ def parse_events(fname, conn, bound_param):
         ## a raw database connection.
         fake_conn = conn.engine.raw_connection()
         fake_cur = fake_conn.cursor()
-        f = open(fname, 'rb')
-        fake_cur.copy_expert('COPY events FROM STDOUT WITH CSV HEADER', f)
-        fake_conn.commit()
-        #fake_conn.close()
-        conn.execute('COMMIT')
+
+        with open(fname, 'r') as f_old, open(fname + '.new', 'w') as f_new:
+            reader = csv.reader(f_old)
+            writer = csv.writer(f_new)
+
+            headers = reader.__next__()
+            headers += ['true_time', 'inserted_time', 'uncertainty', 'source']
+            writer.writerow(headers)
+
+            for row in reader:
+                row += [None, datetime.datetime.utcnow(), 1, 'Retrosheet']
+                writer.writerow(row)
+
+        with open(fname + '.new', 'rb') as f:
+            fake_cur.copy_expert('COPY events FROM STDOUT WITH CSV HEADER', f)
+            fake_conn.commit()
+            #fake_conn.close()
+            conn.execute('COMMIT')
     else:
         reader = csv.reader(open(fname))
         headers = reader.next()
@@ -146,6 +176,9 @@ def parse_events(fname, conn, bound_param):
             ## Avoid adding existing data.
             if res.rowcount == 1:
                 return True
+
+            headers += ['true_time', 'inserted_time', 'uncertainty', 'source']
+            row += [None, datetime.datetime.utcnow(), 1, 'Retrosheet']
 
             sql = 'INSERT INTO events(%s) VALUES(%s)' % (','.join(headers), ','.join([bound_param] * len(headers)))
             conn.execute(sql, row)
