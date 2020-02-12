@@ -163,7 +163,9 @@ def teams():
 def parks():
     remove_file('parks.csv')
 
-    wget.download('https://www.retrosheet.org/parkcode.txt',
+    #wget.download('https://www.retrosheet.org/parkcode.txt',
+    #              out=ABSOLUTE_PATH + '/parks.csv')
+    wget.download('https://raw.githubusercontent.com/rwolst/retrosheet/rwolst-patch-1/misc/parkcode.txt',
                   out=ABSOLUTE_PATH + '/parks.csv')
     print("\nSaved file to %s" % ABSOLUTE_PATH)
 
