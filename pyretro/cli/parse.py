@@ -194,6 +194,7 @@ def parse_people(fname, conn, bound_param):
         ## We have an issue that we cannot simply delete all data and re-copy
         ## the new data, as we will have hanging ravenholm-... references in
         ## events whose player they refer to has been deleted.
+        conn.execute('DROP TABLE IF EXISTS peopleids_temp')
         conn.execute('CREATE TABLE peopleids_temp as SELECT * FROM peopleids LIMIT 0')
 
         ## In order to get access to the copy_expert methods, we have to create
@@ -269,6 +270,7 @@ def parse_players(fname, conn, bound_param):
         ## We have an issue that we cannot simply delete all data and re-copy
         ## the new data, as we will have hanging ravenholm-... references in
         ## events whose player they refer to has been deleted.
+        conn.execute('DROP TABLE IF EXISTS playerids_temp')
         conn.execute('CREATE TABLE playerids_temp as SELECT * FROM playerids LIMIT 0')
 
         ## In order to get access to the copy_expert methods, we have to create
@@ -343,6 +345,7 @@ def parse_hist_players(fname, conn, bound_param):
     print("Processing %s" % fname)
 
     if conn.engine.driver == 'psycopg2':
+        conn.execute('DROP TABLE IF EXISTS hist_peopleids_temp')
         conn.execute('CREATE TABLE hist_playerids_temp as SELECT * FROM hist_playerids LIMIT 0')
 
         ## In order to get access to the copy_expert methods, we have to create
