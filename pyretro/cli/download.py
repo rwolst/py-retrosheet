@@ -4,21 +4,21 @@ job set up to refresh them at regular intervals."""
 
 import urllib.request as urllib
 import os
-import configparser as ConfigParser
 import queue as Queue
 import re
 import click
 import wget
 
 from ..classes.fetcher import Fetcher
-from ..utils import (load_modified_config)
+from ..utils import load_modified_config
+
 
 # Load CONFIG.
 CONFIG = load_modified_config()
 
 # Load and evaluate download directory
-PATH = CONFIG.get('download', 'directory')
-if CONFIG.get('download', 'use_tmp') == 'True':
+PATH = CONFIG['download']['directory']
+if CONFIG['download']['use_tmp']:
     ABSOLUTE_PATH = '/tmp/' + PATH
 else:
     ABSOLUTE_PATH = os.path.abspath(PATH)
@@ -34,7 +34,7 @@ except OSError:
 # load settings into separate var
 # can this be replaced by config var in the future?
 OPTIONS = {}
-OPTIONS['verbose'] = CONFIG.getboolean('debug', 'verbose')
+OPTIONS['verbose'] = CONFIG['debug']['verbose']
 
 
 def remove_file(fname):
@@ -48,7 +48,7 @@ def remove_file(fname):
 
 
 @click.group(help="Download files for populating Retrosheet database.")
-def cli():
+def download():
     pass
 
 
@@ -59,18 +59,15 @@ def retro(years):
     # initialize variables / set defaults
     queue = Queue.Queue()
     threads = []
-    num_threads = CONFIG.getint('download', 'num_threads')
+    num_threads = CONFIG['download']['num_threads']
 
-    ##################################
-    # Queue Event Files for Download #
-    ##################################
-
-    if CONFIG.getboolean('download', 'dl_eventfiles'):
+    # Queue event files.
+    if CONFIG['download']['dl_eventfiles']:
         # log next action
         print("Queuing up Event Files for download.")
 
         # parse retrosheet page for files and add urls to the queue
-        retrosheet_url = CONFIG.get('retrosheet', 'eventfiles_url')
+        retrosheet_url = CONFIG['retrosheet']['eventfiles_url']
         pattern = r'(\d{4}?)eve\.zip'
         html = urllib.urlopen(retrosheet_url).read()
         matches = re.finditer(pattern, str(html), re.S)
@@ -83,16 +80,13 @@ def retro(years):
             url = 'http://www.retrosheet.org/events/%seve.zip' % match.group(1)
             queue.put(url)
 
-    #################################
-    # Queue Game Logs for Download #
-    #################################
-
-    if CONFIG.getboolean('download', 'dl_gamelogs'):
+    # Queue game files.
+    if CONFIG['download']['dl_gamelogs']:
         # log next action
         print("Queuing up Game Logs for download.")
 
         # parse retrosheet page for files and add urls to the queue
-        retrosheet_url = CONFIG.get('retrosheet', 'gamelogs_url')
+        retrosheet_url = CONFIG['retrosheet']['gamelogs_url']
         pattern = r'gl(\d{4})\.zip'
         html = urllib.urlopen(retrosheet_url).read()
         matches = re.finditer(pattern, html, re.S)
@@ -105,9 +99,7 @@ def retro(years):
             url = 'http://www.retrosheet.org/gamelogs/gl%s.zip' % match.group(1)
             queue.put(url)
 
-    ##################
-    # Download Files #
-    ##################
+    # Download.
     # spin up threads
     for i in range(num_threads):
         t = Fetcher(queue, ABSOLUTE_PATH, OPTIONS)
@@ -120,59 +112,4 @@ def retro(years):
     print("\nSaved file to %s" % ABSOLUTE_PATH)
 
 
-@click.command(help="Download PeopleIDs.")
-def people():
-    # Remove file if already exists.
-    remove_file('people.csv')
-
-    wget.download('https://raw.githubusercontent.com/chadwickbureau/register/master/data/people.csv',
-                  out=ABSOLUTE_PATH + '/people.csv')
-    print("\nSaved file to %s" % ABSOLUTE_PATH)
-
-
-@click.command(help="Download PlayerIDs.")
-def players():
-    # Remove file if already exists.
-    remove_file('players.csv')
-
-    wget.download('http://crunchtimebaseball.com/master.csv',
-                  out=ABSOLUTE_PATH + '/players.csv')
-    print("\nSaved file to %s" % ABSOLUTE_PATH)
-
-
-@click.command(help="Download PlayerIDs.")
-def hist_players():
-    # Remove file if already exists.
-    remove_file('hist_players.csv')
-
-    wget.download('https://raw.githubusercontent.com/chadwickbureau/baseballdatabank/master/core/People.csv',
-                  out=ABSOLUTE_PATH + '/hist_players.csv')
-    print("\nSaved file to %s" % ABSOLUTE_PATH)
-
-
-@click.command(help="Download TeamIDs.")
-def teams():
-    remove_file('teams.csv')
-
-    wget.download('http://www.retrosheet.org/CurrentNames.csv',
-                  out=ABSOLUTE_PATH + '/teams.csv')
-    print("\nSaved file to %s" % ABSOLUTE_PATH)
-
-
-@click.command(help="Download Parks.")
-def parks():
-    remove_file('parks.csv')
-
-    #wget.download('https://www.retrosheet.org/parkcode.txt',
-    #              out=ABSOLUTE_PATH + '/parks.csv')
-    wget.download('https://raw.githubusercontent.com/rwolst/retrosheet/rwolst-patch-1/misc/parkcode.txt',
-                  out=ABSOLUTE_PATH + '/parks.csv')
-    print("\nSaved file to %s" % ABSOLUTE_PATH)
-
-
-cli.add_command(retro)
-cli.add_command(people)
-cli.add_command(players)
-cli.add_command(hist_players)
-cli.add_command(teams)
-cli.add_command(parks)
+download.add_command(retro)

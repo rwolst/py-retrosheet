@@ -1,0 +1,29 @@
+database:
+    engine: mysql
+    host: localhost
+    database: retrosheet
+    user: user
+    password: password
+
+download:
+    directory: files
+    use_tmp: True
+
+    # This seems like a safe value for retrosheet.org
+    num_threads: 10
+
+    # Currently, only eventfiles are processed by parse.py, but gamelogs can
+    # still be downloaded.
+    dl_eventfiles: True
+    dl_gamelogs: False
+
+chadwick:
+    directory: chadwick-0.7.1/src/
+
+# Don't change this unless you know what you're doing
+retrosheet:
+    eventfiles_url: http://www.retrosheet.org/game.htm
+    gamelogs_url: http://www.retrosheet.org/gamelogs/index.html
+
+debug:
+    verbose: True

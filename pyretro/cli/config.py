@@ -1,13 +1,15 @@
 """CLI tools for setting the package configuration."""
 
 import os
-import configparser as ConfigParser
 import click
+import yaml
+from pprint import pprint
 
 from ..utils import load_installed_config
 
-@click.group(help="CLI for setting configuration values.")
-def cli():
+
+@click.group(help="Set configuration values.")
+def config():
     pass
 
 
@@ -21,11 +23,21 @@ def modify(section, key, value):
     config, paths = load_installed_config()
 
     # Modify the value.
-    config.set(section, key, value)
+    config[section][key] = value
 
     # Overwrite the old CONFIG.
     with open(paths['config'], 'w') as f:
-        config.write(f)
+        yaml.dump(config, f)
 
 
-cli.add_command(modify)
+@click.command(help="Tool to print CONFIG file.")
+def show():
+    """Modify config file and overwrite the old one."""
+    # First get handle to CONFIG file.
+    config, paths = load_installed_config()
+
+    pprint(config)
+
+
+config.add_command(modify)
+config.add_command(show)

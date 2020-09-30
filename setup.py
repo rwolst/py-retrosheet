@@ -40,20 +40,17 @@ setup(
         'MLB GameDay',
     ],
     platforms='ANY',
-    install_requires=['sqlalchemy', 'psycopg2', 'click', 'wget'],
+    install_requires=['sqlalchemy', 'psycopg2', 'click', 'wget', 'pyyaml'],
     packages=['pyretro', 'pyretro/classes', 'pyretro/cli'],
-    data_files=[('./pyretro_conf', ['pyretro/conf/config.ini.dist']),
-                ('./pyretro_sql', ['pyretro/sql/postgres/hist_playerids_schema.sql',
-                                   'pyretro/sql/postgres/peopleids_schema.sql',
-                                   'pyretro/sql/postgres/playerids_schema.sql',
-                                   'pyretro/sql/postgres/retro_schema.sql',
-                                   'pyretro/sql/postgres/parkcodes_schema.sql',
-                                   'pyretro/sql/postgres/teamids_schema.sql'])],
+    data_files=[
+        ('./pyretro/conf', ['pyretro/conf/config.yml.dist']),
+        ('./pyretro/sql', [
+            'pyretro/sql/postgres/retro_schema.sql',
+        ])
+    ],
+    include_package_data=True,
     entry_points="""
         [console_scripts]
-        pyretro_download=pyretro.cli.download:cli
-        pyretro_ensure=pyretro.cli.ensure:cli
-        pyretro_parse=pyretro.cli.parse:cli
-        pyretro_config=pyretro.cli.config:cli
+        pyretro=pyretro.cli.main:cli
       """,
 )
